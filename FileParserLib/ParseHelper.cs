@@ -1,40 +1,60 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json;
-using System.Text.Json.Nodes;
 
 public static class ParseHelper
 {
     public static IEnumerable<string[]> ParseJson(string rawData)
     {
         using var doc = JsonDocument.Parse(rawData);
-        return FlattenJsonElement(doc.RootElement);
+        return FlattenJsonElement(doc.RootElement).ToList();
     }
 
-    public static IEnumerable<string[]> FlattenJsonElement(JsonElement element)
+    private static IEnumerable<string[]> FlattenJsonElement(JsonElement element)
     {
-        if (element.ValueKind == JsonValueKind.Object)
+        switch (element.ValueKind)
         {
-            var objValues = new List<string>();
+            case JsonValueKind.Object:
+                var objValues = element.EnumerateObject()
+                                       .Select(prop => $"{prop.Name}: {prop.Value}")
+                                       .ToArray();
+                yield return objValues;
+                yield break;
 
-            foreach (var prop in element.EnumerateObject())
-            {
-                objValues.Add($"{prop.Name}: {prop.Value}");
-            }
+            case JsonValueKind.Array:
+                foreach (var item in element.EnumerateArray())
+                {
+                    foreach (var sub in FlattenJsonElement(item))
+                        yield return sub;
+                }
+                yield break;
 
-            yield return objValues.ToArray();
-            yield break;
+            default:
+                yield return new[] { element.ToString() };
+                yield break;
         }
+    }
 
-        if (element.ValueKind == JsonValueKind.Array)
+    public static IEnumerable<string[]> ParseCsv(string rawData)
+    {
+        var lines = rawData.Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries);
+
+        foreach (var line in lines)
         {
-            foreach (var item in element.EnumerateArray())
-            {
-                foreach (var sub in FlattenJsonElement(item))
-                    yield return sub;
-            }
-            
-            yield break;
+            yield return line.Split(',')
+                             .Select(cell => cell.Trim())
+                             .ToArray();
         }
+    }
 
-        yield return new[] { element.ToString() };
+    public static IEnumerable<string[]> ParseTxt(string rawData)
+    {
+        var lines = rawData.Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries);
+
+        foreach (var line in lines)
+        {
+            yield return new[] { line.Trim() };
+        }
     }
 }
