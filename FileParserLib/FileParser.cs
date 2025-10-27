@@ -5,7 +5,7 @@ using FileParserLib;
 public class FileParser : IFileParser
 {
     private readonly FileReader _reader = new FileReader();
-public async Task<IEnumerable<string[]>> ParseContentAsync(string fileName)
+    public async Task<IEnumerable<string[]>> ParseContentAsync(string fileName)
     {
         var extension = Path.GetExtension(fileName).ToLower();
         var rawData = _reader.ReadAllAsync(fileName);
@@ -13,16 +13,17 @@ public async Task<IEnumerable<string[]>> ParseContentAsync(string fileName)
         switch (extension)
         {
             case ".json":
-                var parseJson = await JsonSerializer.DeserializeAsync<string[]>(rawData);
-                break;
+                return new List<string[]>();
             case ".csv":
-                break;
+                return new List<string[]>();
             case ".txt":
-                break;
+                return new List<string[]>();
             case ".docx":
-                break;
+                return new List<string[]>();
             case ".odt":
-                break;
+                return new List<string[]>();
+            default:
+                throw new NotSupportedException($"Filetype: {extension} not supported for parsing.");
         }
     }
 }
