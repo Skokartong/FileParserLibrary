@@ -4,6 +4,9 @@ public class FileReader : IFileReader
 {
     public async Task<string> ReadAllAsync(string fileName)
     {
+        if (string.IsNullOrWhiteSpace(fileName))
+            throw new ArgumentException("Filename cannot be null or empty", nameof(fileName));
+        
         // Combine is used to get full path, as hardcoding it might cause issues
         // on different OS with finding it
         var fullPath = Path.Combine(Directory.GetCurrentDirectory(), fileName);
