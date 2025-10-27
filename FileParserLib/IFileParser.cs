@@ -4,5 +4,5 @@
 // </summary>
 public interface IFileParser
 {
-    IEnumerable<string[]> ParseContent(string fileContent);
+    Task<IEnumerable<string[]>> ParseContentAsync(string fileName);
 }
