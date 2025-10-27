@@ -2,7 +2,7 @@ using FileParserLib;
 
 public class FileReader : IFileReader
 {
-    public async Task<string> ReadAllAsync(string fileName)
+    public async Task<string[]> ReadAllAsync(string fileName)
     {
         // Combine is used to get full path, as hardcoding it might cause issues
         // on different OS with finding it
@@ -11,9 +11,9 @@ public class FileReader : IFileReader
         if (!File.Exists(fullPath))
             throw new FileNotFoundException($"No file found at path: {fullPath}");
 
-        var readContent = await File.ReadAllTextAsync(fullPath);
+        var readContent = await File.ReadAllLinesAsync(fullPath);
 
-        if (string.IsNullOrWhiteSpace(readContent))
+        if (readContent.Length == 0)
             throw new Exception("The file contains no content");
 
         return readContent;
