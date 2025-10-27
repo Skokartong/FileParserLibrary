@@ -1,8 +1,8 @@
 using FileParserLib;
 
-public class FileParser : IFileParser
+public class FileReader : IFileReader
 {
-    public IEnumerable<string[]> ParseContent(string fileContent)
+    public Task<string> ReadAllAsync(string path)
     {
         throw new NotImplementedException();
     }
