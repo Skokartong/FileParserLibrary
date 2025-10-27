@@ -6,6 +6,15 @@ using FileParserLib;
 public class FileParser : IFileParser
 {
     private readonly FileReader _reader = new FileReader();
+
+    private readonly Dictionary<string, Func<string, IEnumerable<string[]>>> _parsers =
+    new Dictionary<string, Func<string, IEnumerable<string[]>>>(StringComparer.OrdinalIgnoreCase)
+    {
+        { ".csv",  ParseHelper.ParseCsv },
+        { ".json", ParseHelper.ParseJson },
+        { ".txt",  ParseHelper.ParseTxt }
+    };
+
     public async Task<IEnumerable<string[]>> ParseContentAsync(string fileName)
     {
         if (string.IsNullOrWhiteSpace(fileName))
@@ -15,14 +24,11 @@ public class FileParser : IFileParser
         if (string.IsNullOrEmpty(extension))
             throw new NotSupportedException("File has no extension.");
 
-        var rawData = await _reader.ReadAllAsync(fileName);
 
-        return extension switch
-        {
-            ".json" => ParseHelper.ParseJson(rawData),
-            ".csv"  => ParseHelper.ParseCsv(rawData),
-            ".txt"  => ParseHelper.ParseTxt(rawData),
-            _       => throw new NotSupportedException($"Filetype: {extension} not supported for parsing.")
-        };
+        if (!_parsers.TryGetValue(extension, out var parser))
+            throw new NotSupportedException($"Filetype: {extension} not supported for parsing.");
+
+        var rawData = await _reader.ReadAllAsync(fileName);
+        return parser(rawData);
     }
 }
