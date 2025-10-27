@@ -5,6 +5,6 @@ namespace FileParserLib;
 // </summary>
 public interface IFileReader
 {
-    Task<string> ReadAllAsync(string path);
+    Task<string> ReadAllAsync(string fileName);
 }
 
